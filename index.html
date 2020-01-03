@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title></title>
+  </head>
+  <body>
+    
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script type="text/javascript">
+
+
+ 
+// Make a request for a user with a given ID
+axios.get('https://cors-anywhere.herokuapp.com/http://samples.openweathermap.org/data/2.5/weather?id=2172797&appid=b6907d289e10d714a6e88b30761fae22')
+  .then(function (response) {
+    // handle success
+    console.log(response);
+  })
+  .catch(function (error) {
+    // handle error
+    console.log(error);
+  });
+</script>
+    </main>
+  </body>
+</html>
