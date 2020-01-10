@@ -1,0 +1,72 @@
+*{
+    box-sizing: border-box;
+}
+::-webkit-input-placeholder {
+    text-align:center;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+    text-align:center;
+}
+
+::-moz-placeholder {  /* Firefox 19+ */
+    text-align:center;
+}
+
+:-ms-input-placeholder {
+    text-align:center;
+}
+
+button{
+    color: white;
+    padding: 5px 10px;
+    border: 1px solid #464646;
+    background-color: #464646;
+    margin: 5px;
+    transition: .3s ease-in-out;
+}
+
+button:disabled{
+    color: white;
+    padding: 5px 10px;
+    border: 1px solid #9b9b9b;
+    background-color: #9b9b9b;
+    margin: 5px;
+    transition: .3s ease-in-out;
+}
+
+button:hover{
+    background-color: #8a8a8a;
+    border: 1px solid #8a8a8a;
+}
+
+input{
+    width: 200px;
+}
+.main{
+    width: 500px;
+    height: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: Tahoma;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.loginBlock{
+    height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#levels{
+    margin: 10px;
+    width: 200px;
+    text-align-last: center;
+}
