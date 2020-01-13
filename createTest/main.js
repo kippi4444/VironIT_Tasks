@@ -30,7 +30,7 @@ class ViewWhyTest {
             select.appendChild(option);
         }
         name.addEventListener('input', () => {
-            (name.value.trim() && name.value.trim().length > 2) ? start.disabled = false : start.disabled = true
+            (/^([а-яА-ЯёЁa-zA-Z]{3,30})$/gm.test(name.value)) ? start.disabled = false : start.disabled = true
         });
     }
 
