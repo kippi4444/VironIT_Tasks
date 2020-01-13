@@ -3,9 +3,11 @@ class ViewWhyTest {
     constructor(container){
         this.mainBlock = container;
     }
+
     init() {
         this.createLogin();
     }
+
     createLogin() {
         let loginBlock = document.createElement('div'),
             name = document.createElement('input'),
@@ -25,34 +27,41 @@ class ViewWhyTest {
         for (let i = 1; i < 4; i++) {
             let  option = document.createElement('option');
             option.value = i;
-            option.innerHTML = `level ${i}`;
+            option.innerHTML = `Уровень сложности ${i}`;
             select.appendChild(option);
         }
-        name.addEventListener('input', () => name.value.trim()? start.disabled = false : start.disabled = true);
+        name.addEventListener('input', () => (name.value.trim() && name.value.trim().length > 2) ? start.disabled = false : start.disabled = true);
     }
+
     createQuestionBlock(){
         this.clearView();
-        let submit = document.createElement('button');
+        this.submit = document.createElement('button');
         this.helloBlock = document.createElement('h3');
         this.wrapperForState = document.createElement('p');
         this.testBlock = document.createElement('div');
         this.testBlock.classList.add('testBlock');
-        submit.innerHTML = 'Далее';
-        submit.id = 'submit';
+        this.submit.id = 'submit';
+        this.submit.innerHTML = 'Далее';
         this.mainBlock.appendChild(this.helloBlock);
         this.mainBlock.appendChild(this.wrapperForState);
         this.mainBlock.appendChild(this.testBlock);
-        this.mainBlock.appendChild(submit);
-    }
-    viewMessage(message) {
-        this.helloBlock.innerHTML = message.mes.toUpperCase();
-        this.wrapperForState.innerHTML = `Отвечено вопросов:  ${message.answers}/ ${message.all} ` ;
+        this.mainBlock.appendChild(this.submit);
+        this.testBlock.addEventListener('input', (event) => {
+            event.target.checked ? this.submit.disabled = false : this.submit.disabled = true;
+        });
     }
 
-    viewReaction(state){
-        if(state) {
-            alert('ygadal');
-        } else  {alert('Ne ygadal')};
+    viewMessage(message) {
+        this.helloBlock.innerHTML = message.mes.toUpperCase();
+        this.wrapperForState.innerHTML = `Отвечено вопросов:  ${message.answers}/ ${message.quantity} ` ;
+    }
+
+    viewReaction(input){
+        if(input.state) {
+            input.value.parentElement.style.color = 'green';
+        } else  {
+            input.value.parentElement.style.color = 'red';
+        }
     }
 
     clearView() {
@@ -60,8 +69,8 @@ class ViewWhyTest {
     }
 
     viewTest(queston) {
-        if (typeof (queston) == 'object'){
         this.testBlock.innerHTML = '';
+        this.submit.disabled = true;
         let h1 = document.createElement('h1'),
             div = document.createElement('div'),
             inputRadio = document.createElement('input');
@@ -77,17 +86,14 @@ class ViewWhyTest {
             p.appendChild(inputRadio);
             p.innerHTML += answer;
             });
-        } else {
-            this.viewRestartMenu(queston);
-        }
     }
 
-    viewRestartMenu(queston) {
+    viewRestartMenu(result) {
         let restart = document.createElement('button');
         restart.id = 'restart';
         restart.innerHTML = 'Заново';
         this.clearView();
-        this.mainBlock.innerHTML = `Ваш результат: ${queston} %`;
+        this.mainBlock.innerHTML = `${result.userName},Ваш результат: ${result.result} %`;
         this.mainBlock.appendChild(restart);
     }
 
@@ -110,14 +116,14 @@ class ModelWhyTest{
         this.selectLevel = select;
         this.createSelectLevelQuestions();
         return {
-            all: this.selectLevelQuestions.length,
+            quantity: this.selectLevelQuestions.length,
             answers: this.count,
             mes:`${this.message[0]} ${name}! ${this.message[1]} ${select}`
         };
     }
 
     createSelectLevelQuestions() {
-        this.questions.forEach(q => {if (q.level == this.selectLevel) this.selectLevelQuestions.push(q)});
+        this.questions.forEach(q => {if (q.level === Number(this.selectLevel)) this.selectLevelQuestions.push(q)});
     }
 
     restart() {
@@ -133,15 +139,7 @@ class ModelWhyTest{
     }
 
     calculateResult() {
-        return this.trueAnswer*100/this.selectLevelQuestions.length;
-    }
-
-    howManyQuestions() {
-        return {
-            all: this.selectLevelQuestions.length,
-            answers: this.count,
-            mes:`${this.userName}, ${this.message[3]} ${this.trueAnswer}`
-        };
+        return {userName: this.userName, result: this.trueAnswer*100/this.selectLevelQuestions.length};
     }
 
     checkAnswer(inputs) {
@@ -149,18 +147,24 @@ class ModelWhyTest{
             if (input.checked) {
                 if (input.value === (this.selectLevelQuestions[this.count - 1].true)) {
                     this.trueAnswer++;
-                    return true;
-                } else return false;
+                    return {state: true, value: input};
+                } else return  {state: false, value: input};
             }
         }
+    }
 
+    howManyQuestions() {
+        return {
+            quantity: this.selectLevelQuestions.length,
+            answers: this.count,
+            mes:`${this.userName}, ${this.message[3]} ${this.trueAnswer}`
+        };
     }
 }
 
 
 class ControllerWhyTest {
     constructor(model, view) {
-        self = this;
         this.view = view;
         this.model = model;
         this.view.init();
@@ -181,25 +185,28 @@ class ControllerWhyTest {
 
     submitAnswer() {
         let submit = document.getElementById('submit');
-        submit.addEventListener('click',() => this.createNextView());
+        submit.addEventListener('click',() => {
+            let quantityQuestions = this.model.howManyQuestions();
+            let input = document.getElementsByName('answer');
+            if (quantityQuestions.quantity !== quantityQuestions.answers){
+                this.view.viewReaction(this.model.checkAnswer(input));
+                setTimeout(() => this.createNextView(), 300);
+            } else {
+                this.view.viewReaction(this.model.checkAnswer(input));
+                setTimeout(() => {
+                this.view.viewRestartMenu(this.model.calculateResult());
+                this.restart();
+                }, 300);
+            }
+        });
     }
 
-    createNextView(){
-        let allQuestions = this.model.howManyQuestions();
-        let input = document.getElementsByName('answer');
-        if (allQuestions.all !== allQuestions.answers){
-            this.view.viewReaction(this.model.checkAnswer(input));
-            this.view.viewMessage(allQuestions);
-            this.view.viewTest(this.model.getQuestion());
-        } else {
-            this.view.viewReaction(this.model.checkAnswer(input));
-            this.view.viewMessage(allQuestions);
-            this.view.viewTest(this.model.calculateResult());
-            this.restart();
-        }
+    createNextView() {
+        this.view.viewTest(this.model.getQuestion());
+        this.view.viewMessage(this.model.howManyQuestions());
     }
 
-    restart(){
+    restart() {
         let restart = document.getElementById('restart');
         restart.addEventListener('click',() => {
             this.view.clearView();
