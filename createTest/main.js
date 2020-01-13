@@ -15,7 +15,7 @@ class ViewWhyTest {
         select.id = 'levels';
         name.placeholder = 'Введите Имя';
         start.id = 'start';
-        start.innerText = 'start';
+        start.innerText = 'Начать';
         start.disabled = true;
         this.mainBlock.appendChild(loginBlock);
         loginBlock.appendChild(name);
@@ -30,24 +30,31 @@ class ViewWhyTest {
         }
         name.addEventListener('input', () => name.value.trim()? start.disabled = false : start.disabled = true);
     }
-    viewMessage(message) {
+    createQuestionBlock(){
         this.clearView();
-        this.mainBlock.innerHTML = message.toUpperCase();
         let submit = document.createElement('button');
+        this.helloBlock = document.createElement('h3');
+        this.wrapperForState = document.createElement('p');
         this.testBlock = document.createElement('div');
         this.testBlock.classList.add('testBlock');
-        submit.innerHTML = 'Отправить';
+        submit.innerHTML = 'Далее';
         submit.id = 'submit';
+        this.mainBlock.appendChild(this.helloBlock);
+        this.mainBlock.appendChild(this.wrapperForState);
         this.mainBlock.appendChild(this.testBlock);
         this.mainBlock.appendChild(submit);
     }
+    viewMessage(message) {
+        this.helloBlock.innerHTML = message.mes.toUpperCase();
+        this.wrapperForState.innerHTML = `Отвечено вопросов:  ${message.answers}/ ${message.all} ` ;
+    }
 
     viewReaction(state){
-        console.log(state)
         if(state) {
-            alert('Molodec');
+            alert('ygadal');
         } else  {alert('Ne ygadal')};
     }
+
     clearView() {
         this.mainBlock.innerHTML = '';
     }
@@ -62,7 +69,7 @@ class ViewWhyTest {
         inputRadio.name = 'answer';
         h1.innerHTML = queston.text;
         div.appendChild(h1);
-        queston.answers.forEach(answer =>{
+        queston.answers.sort(() => 0.5 - Math.random()).forEach(answer =>{
             let p = document.createElement('p');
             this.testBlock.appendChild(div);
             div.appendChild(p);
@@ -71,20 +78,26 @@ class ViewWhyTest {
             p.innerHTML += answer;
             });
         } else {
-            let restart = document.createElement('button');
-            restart.id = 'restart';
-            restart.innerHTML = 'Заново';
-            this.clearView();
-            this.mainBlock.innerHTML = `Ваш результат: ${queston} %`;
-            this.mainBlock.appendChild(restart);
+            this.viewRestartMenu(queston);
         }
     }
+
+    viewRestartMenu(queston) {
+        let restart = document.createElement('button');
+        restart.id = 'restart';
+        restart.innerHTML = 'Заново';
+        this.clearView();
+        this.mainBlock.innerHTML = `Ваш результат: ${queston} %`;
+        this.mainBlock.appendChild(restart);
+    }
+
+
 }
 
 class ModelWhyTest{
     constructor(questions){
         this.questions = questions;
-        this.message = ['Здравствуйте, ', 'Вы выбрали уровень сложности '];
+        this.message = ['Здравствуйте, ', 'Вы выбрали уровень сложности: ', 'Всего вопросов: ', 'Правильно отвеченных вопросов: '];
         this.userName = null;
         this.selectLevel = null;
         this.selectLevelQuestions = [];
@@ -92,16 +105,19 @@ class ModelWhyTest{
         this.trueAnswer = 0;
     }
 
-    checkFields(name, select){
+    checkFields(name, select) {
         this.userName = name;
         this.selectLevel = select;
         this.createSelectLevelQuestions();
-        return (`${this.message[0]} ${name}! ${this.message[1]} ${select}`);
+        return {
+            all: this.selectLevelQuestions.length,
+            answers: this.count,
+            mes:`${this.message[0]} ${name}! ${this.message[1]} ${select}`
+        };
     }
 
-    createSelectLevelQuestions(){
+    createSelectLevelQuestions() {
         this.questions.forEach(q => {if (q.level == this.selectLevel) this.selectLevelQuestions.push(q)});
-        console.log(this.selectLevelQuestions);
     }
 
     restart() {
@@ -111,40 +127,40 @@ class ModelWhyTest{
         this.selectLevelQuestions = [];
     }
 
-    startTest() {
+    getQuestion() {
         this.count++;
-        if ( this.count-1 < this.selectLevelQuestions.length){
-            return  this.selectLevelQuestions[this.count-1];
-        } else {
-            return this.trueAnswer*100/this.selectLevelQuestions.length;
-        }
+        return  this.selectLevelQuestions[this.count-1];
     }
 
-    // nextQuestion(){
-    //     this.count++;
-    //     if ( this.count-1 < this.selectLevelQuestions.length){
-    //         return  this.selectLevelQuestions[this.count-1];
-    //     } else {
-    //         return this.trueAnswer*100/this.selectLevelQuestions.length;
-    //     }
-    // }
+    calculateResult() {
+        return this.trueAnswer*100/this.selectLevelQuestions.length;
+    }
 
-    checkAnswer(input) {
-        for (let i = 0; i < input.length; i++) {
-            console.log(this.selectLevelQuestions[this.count - 1].true)
-            if (input[i].checked) {
-                if (input[i].value === (this.selectLevelQuestions[this.count - 1].true)) {
+    howManyQuestions() {
+        return {
+            all: this.selectLevelQuestions.length,
+            answers: this.count,
+            mes:`${this.userName}, ${this.message[3]} ${this.trueAnswer}`
+        };
+    }
+
+    checkAnswer(inputs) {
+        for(let input of inputs){
+            if (input.checked) {
+                if (input.value === (this.selectLevelQuestions[this.count - 1].true)) {
                     this.trueAnswer++;
                     return true;
                 } else return false;
             }
         }
+
     }
 }
 
 
 class ControllerWhyTest {
     constructor(model, view) {
+        self = this;
         this.view = view;
         this.model = model;
         this.view.init();
@@ -156,27 +172,40 @@ class ControllerWhyTest {
             input = document.getElementsByTagName('input')[0],
             select = document.getElementById('levels');
         start.addEventListener('click', () =>{
+            this.view.createQuestionBlock();
             this.view.viewMessage(this.model.checkFields(input.value, select.value));
-            this.view.viewTest(this.model.startTest());
+            this.view.viewTest(this.model.getQuestion());
             this.submitAnswer();
         });
     }
 
     submitAnswer() {
         let submit = document.getElementById('submit');
+        submit.addEventListener('click',() => this.createNextView());
+    }
+
+    createNextView(){
+        let allQuestions = this.model.howManyQuestions();
         let input = document.getElementsByName('answer');
-        submit.addEventListener('click', () =>{
+        if (allQuestions.all !== allQuestions.answers){
             this.view.viewReaction(this.model.checkAnswer(input));
-            this.view.viewTest(this.model.startTest());
-            let restart = document.getElementById('restart');
-            if(restart){
-                restart.addEventListener('click',() => {
-                    this.view.clearView();
-                    this.model.restart();
-                    this.view.init();
-                    this.start();
-                });
-            }
+            this.view.viewMessage(allQuestions);
+            this.view.viewTest(this.model.getQuestion());
+        } else {
+            this.view.viewReaction(this.model.checkAnswer(input));
+            this.view.viewMessage(allQuestions);
+            this.view.viewTest(this.model.calculateResult());
+            this.restart();
+        }
+    }
+
+    restart(){
+        let restart = document.getElementById('restart');
+        restart.addEventListener('click',() => {
+            this.view.clearView();
+            this.model.restart();
+            this.view.init();
+            this.start();
         });
     }
 
@@ -185,16 +214,16 @@ class ControllerWhyTest {
 let allQuestions = [
     {level: 1, text: 'Сколько суток составляют високосный год?', answers:['365','366','360','364'], true:'366'},
     {level: 1, text: 'Сколько ног у улитки?', answers:['1','2','4','5'], true:'1'},
-    {level: 1, text: 'Есть ли жизнь под ободком унитаза?', answers:['да','нет','туалетный утенок','ребята сегодня не получится'], true:'да'},
-    {level: 1, text: 'Сок стоит стандартная шаурма на Комарах?', answers:['5р','8р','ну грубо говоря 7р','ребята 10р'], true:'8р'},
-    {level: 2, text: '2+2= ?', answers:['5','9','8/2','3*2'], true:'8/2'},
-    {level: 2, text: 'Ауе?', answers:['666','777','ну ты понял','937 99 92'], true:'666'},
-    {level: 2, text: 'Завтра существует?', answers:['да','нет','ну грубо говоря да','завтраки твои эти'], true:'нет'},
-    {level: 2, text: 'Будет ли завтра лекция?', answers:['да','нет','ну грубо говоря да','ребята сегодня не получится'], true:'нет'},
-    {level: 3, text: 'Как лает собака?', answers:['Гав','Рав','Уф, сук','слышь, пацанчик, дай на планчик'], true:'Гав'},
-    {level: 3, text: 'Милиция в молодежном сленге в 2020?', answers:['фараоны','менты','полис-мены','мусора'], true:'менты'},
-    {level: 3, text: '5 минут назад?', answers:['я т****л с**у в мерсе','время','песня такая','что?'], true:'что?'},
-    {level: 3, text: 'Ты дурака за меня не держи', answers:['видео блоггер','компьютерщик','баба Галя','Гамаз'], true:'Гамаз'}
+    {level: 1, text: 'В какую из этих игр играют не клюшкой?', answers:['Хоккей','Гольф','Поло','Бильярд'], true:'Бильярд'},
+    {level: 1, text: '2+2= ?', answers:['5','8','4','10'], true:'4'},
+    {level: 2, text: 'От какого дерева появляются желуди?', answers:['Дуб','Каштан','Ясень','Клен'], true:'Дуб'},
+    {level: 2, text: 'Где муха-цокотуха нашла денежку?', answers:['В лесу','В поле','Во дворе','На лугу'], true:'В поле'},
+    {level: 2, text: 'В артериях кровь движется...?', answers:['Сверху вниз','От органов к сердцу','От сердца к органам','Снизу вверх'], true:'От сердца к органам'},
+    {level: 2, text: 'Корюшка - это...', answers:['Крючок','Птичка','Растение','Рыбка'], true:'Рыбка'},
+    {level: 3, text: 'Чему равна сумма чисел от 0 до 100 включительно?', answers:['3525','1000','5050','7550'], true:'5050'},
+    {level: 3, text: 'У кого из "вампиров" кровь пьют только самки?', answers:['Летучие мыши','Люди','Пиявки','Комары'], true:'Комары'},
+    {level: 3, text: 'Территория какой из этих стран - наибольшая?', answers:['Италия','Япония','Германия','Финляндия'], true:'Япония'},
+    {level: 3, text: 'Какая из этих кислот является витамином?', answers:['Молочная','Яблочная','Никотиновая','Янтарная'], true:'Никотиновая'}
 ];
 
 

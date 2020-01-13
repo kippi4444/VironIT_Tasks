@@ -40,9 +40,6 @@ button:hover{
     border: 1px solid #8a8a8a;
 }
 
-input{
-    width: 200px;
-}
 .main{
     width: 500px;
     height: 600px;
@@ -65,8 +62,15 @@ input{
     flex-direction: column;
 }
 
+.testBlock div p{
+    display: flex;
+    justify-content: center;
+}
+
 #levels{
     margin: 10px;
-    width: 200px;
+    width: 173px;
     text-align-last: center;
 }
+
+
