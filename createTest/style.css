@@ -17,6 +17,10 @@
     text-align:center;
 }
 
+h1{
+    margin: 0px;
+}
+
 button{
     color: white;
     padding: 5px 10px;
@@ -26,13 +30,28 @@ button{
     transition: .3s ease-in-out;
 }
 
+table {
+    margin: 10px;
+    padding: 5px;
+    border: 1px dashed gray;
+    border-radius: 3px;
+}
+
+table tr{
+    padding: 10px;
+}
+
+table tr td{
+    padding: 10px;
+}
+
 button:disabled{
     color: white;
     padding: 5px 10px;
     border: 1px solid #9b9b9b;
     background-color: #9b9b9b;
     margin: 5px;
-    transition: .3s ease-in-out;
+    transition: .2s ease-in-out;
 }
 
 button:hover{
@@ -55,17 +74,22 @@ button:hover{
 }
 
 .loginBlock{
-    height: 600px;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
 }
-
-
-.testBlock div p{
+.testBlock {
+    width: 500px;
+    height: 210px;
+    padding: 10px;
+    border: 1px dashed #9b9b9b;
+    border-radius: 3px;
+}
+.testBlock p{
     display: flex;
     justify-content: center;
+
 }
 
 #levels{

@@ -72,16 +72,14 @@ class ViewWhyTest {
         this.testBlock.innerHTML = '';
         this.submit.disabled = true;
         let h1 = document.createElement('h1'),
-            div = document.createElement('div'),
             inputRadio = document.createElement('input');
         inputRadio.type = 'radio';
         inputRadio.name = 'answer';
         h1.innerHTML = queston.text;
-        div.appendChild(h1);
+        this.testBlock.appendChild(h1);
         queston.answers.sort(() => 0.5 - Math.random()).forEach(answer =>{
             let p = document.createElement('p');
-            this.testBlock.appendChild(div);
-            div.appendChild(p);
+            this.testBlock.appendChild(p);
             inputRadio.value = answer;
             p.appendChild(inputRadio);
             p.innerHTML += answer;
@@ -92,9 +90,36 @@ class ViewWhyTest {
         let restart = document.createElement('button');
         restart.id = 'restart';
         restart.innerHTML = 'Заново';
+        let viewResult = document.createElement('button');
+        viewResult.id = 'viewResult';
+        viewResult.innerHTML = 'Мои ответы';
         this.clearView();
         this.mainBlock.innerHTML = `${result.userName},Ваш результат: ${result.result} %`;
+        this.mainBlock.appendChild(viewResult);
         this.mainBlock.appendChild(restart);
+
+    }
+
+    viewResult(allAnswers){
+        let wrapper = document.createElement('table');
+        let viewResult = document.getElementById('viewResult');
+        viewResult.disabled = true;
+        this.mainBlock.appendChild(wrapper);
+        for(let key of allAnswers){
+            let tr = document.createElement('tr');
+            let td = document.createElement('td');
+            wrapper.appendChild(tr);
+            tr.innerHTML += ` Вопрос:  ${key.title}`;
+            tr.appendChild(td);
+            td.innerHTML += ` Ваш ответ: ${key.selectValue}`;
+            if (key.state){
+                td.style.color = 'green';
+            } else {
+                td.style.color = 'red';
+
+            }
+
+        }
     }
 
 
@@ -109,6 +134,7 @@ class ModelWhyTest{
         this.selectLevelQuestions = [];
         this.count = 0;
         this.trueAnswer = 0;
+        this.userAnswers = [];
     }
 
     checkFields(name, select) {
@@ -138,6 +164,10 @@ class ModelWhyTest{
         return  this.selectLevelQuestions[this.count-1];
     }
 
+    getAllAnswers(){
+        return this.userAnswers;
+    }
+
     calculateResult() {
         return {userName: this.userName, result: this.trueAnswer*100/this.selectLevelQuestions.length};
     }
@@ -145,10 +175,15 @@ class ModelWhyTest{
     checkAnswer(inputs) {
         for(let input of inputs){
             if (input.checked) {
+
                 if (input.value === (this.selectLevelQuestions[this.count - 1].true)) {
                     this.trueAnswer++;
+                    this.userAnswers.push({title: this.selectLevelQuestions[this.count - 1].text, selectValue: input.value, state: true});
                     return {state: true, value: input};
-                } else return  {state: false, value: input};
+                } else{
+                    this.userAnswers.push({title: this.selectLevelQuestions[this.count - 1].text, selectValue: input.value, state: false});
+                    return  {state: false, value: input};
+                }
             }
         }
     }
@@ -207,7 +242,11 @@ class ControllerWhyTest {
     }
 
     restart() {
+        let showResult = document.getElementById('viewResult');
         let restart = document.getElementById('restart');
+        showResult.addEventListener('click',() => {
+          this.view.viewResult(this.model.getAllAnswers()) ;
+        });
         restart.addEventListener('click',() => {
             this.view.clearView();
             this.model.restart();
