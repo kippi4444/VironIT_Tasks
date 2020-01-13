@@ -1,4 +1,3 @@
-//==============MVC================//
 class ViewWhyTest {
     constructor(container){
         this.mainBlock = container;
@@ -30,7 +29,9 @@ class ViewWhyTest {
             option.innerHTML = `Уровень сложности ${i}`;
             select.appendChild(option);
         }
-        name.addEventListener('input', () => (name.value.trim() && name.value.trim().length > 2) ? start.disabled = false : start.disabled = true);
+        name.addEventListener('input', () => {
+            (name.value.trim() && name.value.trim().length > 2) ? start.disabled = false : start.disabled = true
+        });
     }
 
     createQuestionBlock(){
@@ -57,6 +58,7 @@ class ViewWhyTest {
     }
 
     viewReaction(input){
+        this.submit.disabled=true;
         if(input.state) {
             input.value.parentElement.style.color = 'green';
         } else  {
@@ -97,7 +99,6 @@ class ViewWhyTest {
         this.mainBlock.innerHTML = `${result.userName},Ваш результат: ${result.result} %`;
         this.mainBlock.appendChild(viewResult);
         this.mainBlock.appendChild(restart);
-
     }
 
     viewResult(allAnswers){
@@ -116,12 +117,9 @@ class ViewWhyTest {
                 td.style.color = 'green';
             } else {
                 td.style.color = 'red';
-
             }
-
         }
     }
-
 
 }
 
@@ -175,7 +173,6 @@ class ModelWhyTest{
     checkAnswer(inputs) {
         for(let input of inputs){
             if (input.checked) {
-
                 if (input.value === (this.selectLevelQuestions[this.count - 1].true)) {
                     this.trueAnswer++;
                     this.userAnswers.push({title: this.selectLevelQuestions[this.count - 1].text, selectValue: input.value, state: true});
@@ -195,8 +192,8 @@ class ModelWhyTest{
             mes:`${this.userName}, ${this.message[3]} ${this.trueAnswer}`
         };
     }
-}
 
+}
 
 class ControllerWhyTest {
     constructor(model, view) {
@@ -220,6 +217,7 @@ class ControllerWhyTest {
 
     submitAnswer() {
         let submit = document.getElementById('submit');
+
         submit.addEventListener('click',() => {
             let quantityQuestions = this.model.howManyQuestions();
             let input = document.getElementsByName('answer');
